@@ -1,38 +1,53 @@
-// PRUSA Mendel  
-// Bar clamp
-// Used for joining 8mm rods
-// GNU GPL v3
-// Josef Průša
-// josefprusa@me.com
-// prusadjs.cz
-// http://www.reprap.org/wiki/Prusa_Mendel
-// http://github.com/prusajr/PrusaMendel
+wedge_width = 7.6;
+m8_diam_tight = 8.2;
+m8_diameter = 8.6;
+wall_thickness = 3.3;
 
-include <configuration.scad>
+wedge_outer_angle = 2;
 
-/**
- * @id bar-clamp
- * @name Bar clamp
- * @category Printed
- * @using 2 m8nut
- * @using 2 m8washer
- */ 
+$fn=64;
 
-module barclamp(){
-outer_diameter = (threaded_rod_diameter-0.0)/2+2.4;
+module teardrop (r=8, h=20) {
+    render()
+    rotate([-270, 0, 90]) {
+        cylinder(r=r, h=h, $fn=64);
+        translate([-(r * sqrt(2)) / 2, 0, 0]) cube([r * sqrt(2), r * sqrt(2) / 2, h]);
+        difference() {
+            rotate([0, 0, 45]) cube([r, r, h]);
+            translate([-r, r, -1]) cube([2 * r, r, h + 2]);
+        }
+    }
+}
 
-difference(){
-	union(){
-		
-		translate([outer_diameter, outer_diameter, 0])cylinder(h =outer_diameter*2, r = outer_diameter, $fn = 20);
-		translate([outer_diameter, 0, 0])cube([outer_diameter+1.5,outer_diameter*2,outer_diameter*2]);
-		translate([18, 2*outer_diameter, outer_diameter])rotate([90, 0, 0]) rotate([00, 0, 0]) nut(outer_diameter*2,outer_diameter*2,false);
+
+module barclamp() {
+	hole_radius = (m8_diam_tight + m8_diameter) / 4;
+	body_radius = hole_radius + wall_thickness;
+
+	difference(){
+		union(){
+			// rod clamp
+			cylinder(r=body_radius, h=body_radius * 2);
+
+			// arms
+			translate([0, -body_radius * 1.5, 0]) cube([hole_radius * 2, body_radius * 3, body_radius * 2]);
+			// horizontal hole outer
+			translate([hole_radius * 2, 0, body_radius]) rotate([90, 0, 0]) cylinder(r=body_radius / cos(180 / 6), h = body_radius * 3, center=true, $fn=6);
+		}
+
+		// rod hole - tight!
+		#translate([0, 0, -1]) cylinder(r=m8_diam_tight / 2, h=body_radius * 2 + 2);
+
+		// horizontal hole
+		#translate([hole_radius * 2, -body_radius * 1.5 - 1, body_radius]) rotate([0, 0, 90]) teardrop(r=m8_diameter / 2, h=body_radius * 3 + 2);
+
+		// wedge
+		translate([0, wedge_width / -2, -1]) cube([body_radius * 3, wedge_width, body_radius * 2 + 2]);
+
+		// wedge outer angle
+		rotate([0, 0, wedge_outer_angle]) translate([-1, body_radius, -1]) cube([body_radius * 3, body_radius, body_radius * 2 + 2]);
+		rotate([0, 0, -wedge_outer_angle]) translate([-1, -2 * body_radius, -1]) cube([body_radius * 3, body_radius, body_radius * 2 + 2]);
 	}
-
-
-	translate([18, outer_diameter, 9])cube([18,05,20], center=true);
-	translate([outer_diameter, outer_diameter, -1]) #cylinder(h =20, r = threaded_rod_diameter/2-0.4, $fn = 18);
-	translate([17, 17, 7.5]) rotate([90, 0, 0]) #cylinder(h =20, r = threaded_rod_diameter/2, $fn = 20);
 }
-}
+
 barclamp();

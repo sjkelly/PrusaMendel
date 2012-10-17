@@ -17,10 +17,17 @@ include <configuration.scad>
  */
 
 module rodclamp(){ 
-translate([-5,0,5]) rotate([0,-270,0]) translate([0,0,5]) difference(){
-cube([10,25,10],center=true);
-translate([-5,0,0]) cylinder(r=4.1,h=20,center=true);
-translate([0,7,0]) rotate([0,90,0]) cylinder(r=m3_diameter/2,h=20,center=true);translate([0,-7,0]) rotate([0,90,0]) cylinder(r=m3_diameter/2,h=20,center=true);}
+	translate([-5,0,5]) rotate([0,-270,0]) translate([0,0,5]) difference(){
+		union(){
+			cube([10,14,10],center=true);
+			translate([0,7,0]) rotate([0,90,0]) cylinder(r=10/2,h=10,center=true);
+			translate([0,-7,0]) rotate([0,90,0]) cylinder(r=10/2,h=10,center=true);
+		}
+		translate([-5,0,0]) cylinder(r=4.1,h=20,center=true);
+		translate([0,7,0]) rotate([0,90,0]) cylinder(r=m3_diameter/2,h=20,center=true);
+		translate([0,-7,0]) rotate([0,90,0]) cylinder(r=m3_diameter/2,h=20,center=true);
+
+	}
 }
 
  rodclamp();
